@@ -213,12 +213,6 @@ function(
 	FeedListItem._nMaxCharactersMobile = 300;
 	FeedListItem._nMaxCharactersDesktop = 500;
 
-	/**
-	 * Default texts are fetched from the sap.m resource bundle
-	 */
-	FeedListItem._sTextShowMore = FeedListItem._oRb.getText("TEXT_SHOW_MORE");
-	FeedListItem._sTextShowLess = FeedListItem._oRb.getText("TEXT_SHOW_LESS");
-
 	FeedListItem.prototype.init = function() {
 		ListItemBase.prototype.init.apply(this);
 		this.setAggregation("_text", new FormattedText(this.getId() + "-formattedText"), true);
@@ -298,7 +292,7 @@ function(
 		Control.prototype.invalidate.apply(this, arguments);
 		delete this._bTextExpanded;
 		if (this._oLinkExpandCollapse) {
-			this._oLinkExpandCollapse.setProperty("text", FeedListItem._sTextShowMore, true);
+			this._oLinkExpandCollapse.setProperty("text", FeedListItem._oRb.getText("TEXT_SHOW_MORE"), true);
 		}
 	};
 
@@ -562,13 +556,13 @@ function(
 		if (this._bTextExpanded) {
 			$text.html(this._sShortText.replace(/&#xa;/g, "<br>"));
 			$threeDots.text(" ... ");
-			this._oLinkExpandCollapse.setText(FeedListItem._sTextShowMore);
+			this._oLinkExpandCollapse.setText(FeedListItem._oRb.getText("TEXT_SHOW_MORE"));
 			this._bTextExpanded = false;
 			this._clearEmptyTagsInCollapsedText();
 		} else {
 			$text.html(this._sFullText.replace(/&#xa;/g, "<br>"));
 			$threeDots.text("  ");
-			this._oLinkExpandCollapse.setText(FeedListItem._sTextShowLess);
+			this._oLinkExpandCollapse.setText(FeedListItem._oRb.getText("TEXT_SHOW_LESS"));
 			this._bTextExpanded = true;
 		}
 	};
@@ -582,7 +576,7 @@ function(
 	FeedListItem.prototype._getLinkExpandCollapse = function() {
 		if (!this._oLinkExpandCollapse) {
 			this._oLinkExpandCollapse = new Link({
-				text: FeedListItem._sTextShowMore,
+				text: FeedListItem._oRb.getText("TEXT_SHOW_MORE"),
 				press: [this._toggleTextExpanded, this]
 			});
 			this._bTextExpanded = false;
@@ -680,6 +674,21 @@ function(
 	FeedListItem.prototype.setUnread = function(value) {
 		return this.setProperty("unread", false, true);
 	};
+
+
+	/**
+	 * Localization changed
+	 * @private
+	 */
+	 FeedListItem.prototype.onlocalizationChanged = function(oEvent) {
+		var oChanges = oEvent.getParameter("changes");
+			if (oChanges && oChanges.hasOwnProperty("language")) {
+				FeedListItem._oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m", oChanges.language);
+				this.rerender();
+			}
+		}.bind(this));
+	 };
+	}
 
 	return FeedListItem;
 
